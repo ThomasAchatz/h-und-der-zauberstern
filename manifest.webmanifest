@@ -1,0 +1,13 @@
+{
+  "name": "Hanna und der Zauberstern",
+  "short_name": "Zauberstern",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF1DC",
+  "theme_color": "#FFF1DC",
+  "lang": "de",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
