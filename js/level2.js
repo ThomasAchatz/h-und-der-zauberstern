@@ -64,9 +64,9 @@ ${hat}${item}</g>`;
     "kind-kappe": "Grüne Kappe, aber das ist ein Kind. Michael ist erwachsen und hat eine Brezel.",
   };
 
-  const findG = (id, x, y, sc, inner, r = 30, ry = 42) => `<g class="find" data-find="${id}" transform="translate(${x} ${y}) scale(${sc})">
-<ellipse cx="0" cy="${-ry + 8}" rx="${r - 8}" ry="${ry}" fill="transparent"/>${inner}
-<g class="mark" transform="translate(0 ${-ry + 8})"><ellipse rx="${r - 6}" ry="${ry - 4}" fill="none" stroke="#2F8F46" stroke-width="3"/><circle cx="${r - 10}" cy="${-ry + 8}" r="8.5" fill="#2F8F46"/><path d="M${r - 14} ${-ry + 8}l3 3 5.4-6" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+  const findG = (id, x, y, sc, inner, r = 30, ry = 42, mark = "") => `<g class="find" data-find="${id}"${mark ? ` data-mark="${mark}"` : ""} transform="translate(${x} ${y}) scale(${sc})">
+<ellipse cx="0" cy="${-ry + 8}" rx="${r - 8}" ry="${ry}" fill="transparent"/><g class="item">${inner}</g>
+</g>`;
 
   const ticket = `<g transform="rotate(-14)"><rect x="-13" y="-8" width="26" height="16" rx="2.5" fill="#FFD23F" stroke="#C9A23A" stroke-width="1.4"/><path d="M5 -8V8" stroke="#C9A23A" stroke-width="1.2" stroke-dasharray="2 2"/><polygon points="${Art.starPts(4.5)}" transform="translate(-4 0)" fill="#B8326F"/></g>`;
   const teddy = `<circle cx="-6" cy="-14" r="3.6" fill="#B07A45"/><circle cx="6" cy="-14" r="3.6" fill="#B07A45"/><ellipse cx="0" cy="0" rx="8" ry="9" fill="#B07A45"/><circle cx="0" cy="-10" r="7" fill="#C38B53"/><circle cx="-2.4" cy="-11" r="1" fill="#2B1C12"/><circle cx="2.4" cy="-11" r="1" fill="#2B1C12"/><ellipse cx="0" cy="-8" rx="2.6" ry="1.8" fill="#E8C9A0"/><ellipse cx="0" cy="2" rx="4.5" ry="5" fill="#E8C9A0"/>`;
@@ -107,8 +107,8 @@ ${Art.treeG(14, 128).replace('transform="translate(14 128)"', 'transform="transl
 <g><rect x="196" y="370" width="56" height="7" rx="3" fill="#A5733F"/><rect x="196" y="360" width="56" height="6" rx="3" fill="#C99660"/><path d="M202 377v12M246 377v12" stroke="#6B4423" stroke-width="3"/></g>
 ${findG("glasses", 222, 362, 1, glasses, 22, 18)}
 ${findG("teddy", 70, 236, 1, `<g transform="translate(0 -4)">${teddy}</g>`, 22, 22)}
-${findG("ticket", 196, 336, 1, ticket, 22, 18)}
-${CROWD.map((c, i) => c.who === "x" ? `<g class="person" data-i="${i}" transform="translate(${c.x} ${c.y}) scale(${c.sc})"><ellipse cx="0" cy="-34" rx="20" ry="40" fill="transparent"/><g class="wob">${person(c.o)}</g></g>` : findG(c.who, c.x, c.y, c.sc, person(c.o), 26, 44)).join("")}
+${findG("ticket", 86, 356, 1, ticket, 22, 18)}
+${CROWD.map((c, i) => c.who === "x" ? `<g class="person" data-i="${i}" transform="translate(${c.x} ${c.y}) scale(${c.sc})"><ellipse cx="0" cy="-34" rx="20" ry="40" fill="transparent"/><g class="wob">${person(c.o)}</g></g>` : findG(c.who, c.x, c.y, c.sc, person(c.o), 26, 44, `${c.x},${(c.y - 30 * c.sc).toFixed(1)},${(25 * c.sc + 3).toFixed(1)}`)).join("")}
 </svg>`;
   };
 
@@ -121,7 +121,7 @@ ${CROWD.map((c, i) => c.who === "x" ? `<g class="person" data-i="${i}" transform
   const FINDS = [
     ["mama", "Mama", (f) => faceIcon("#FFD23F", "sun", f), "Mama trägt einen gelben Sonnenhut und hält einen roten Luftballon."],
     ["michael", "Michael", (f) => faceIcon("#4E9A3E", "cap", f), "Michael hat eine grüne Kappe auf und isst eine Brezel."],
-    ["ticket", "Karte", (f) => objIcon(ticket, f), "Die Eintrittskarte liegt auf dem Boden neben dem Brunnen."],
+    ["ticket", "Karte", (f) => objIcon(ticket, f), "Die Eintrittskarte liegt links auf dem Boden."],
     ["teddy", "Teddy", (f) => objIcon(`<g transform="translate(0 4)">${teddy}</g>`, f), "Der Teddy sitzt ganz hinten bei den Bäumen."],
     ["glasses", "Brille", (f) => objIcon(glasses, f), "Die Sonnenbrille liegt auf der Bank."],
   ];
@@ -145,6 +145,7 @@ ${G.minaRow("Oje, wir haben Mama und Michael verloren! Tippe unten auf Mama, dan
       const done = (id, g) => {
         found.add(id);
         g.classList.add("found"); g.classList.remove("pulse");
+        G.markEl(svg, g);
         const li = $(`[data-li="${id}"]`, el);
         li.classList.add("got");
         const f = FINDS.find(([k]) => k === id);
@@ -173,8 +174,7 @@ ${G.minaRow("Oje, wir haben Mama und Michael verloren! Tippe unten auf Mama, dan
           return;
         }
         const pt = G.svgPoint(svg, e);
-        svg.insertAdjacentHTML("beforeend", `<circle class="ripple" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="4"/>`);
-        setTimeout(() => svg.querySelector(".ripple") && svg.querySelector(".ripple").remove(), 600);
+        G.ripple(svg, pt.x, pt.y);
       });
       $("#hint", el).onclick = () => {
         G.sfx("tap");
@@ -183,9 +183,7 @@ ${G.minaRow("Oje, wir haben Mama und Michael verloren! Tippe unten auf Mama, dan
         hints++;
         G.say(left[3]); G.speak(left[3]);
         if (hints >= 2 || !["mama", "michael"].includes(left[0])) {
-          const g = svg.querySelector(`[data-find="${left[0]}"]`);
-          g.classList.add("pulse");
-          setTimeout(() => g.classList.remove("pulse"), 3500);
+          G.hintEl(svg, svg.querySelector(`[data-find="${left[0]}"]`));
         }
       };
       $("#next", el).onclick = () => { G.sfx("tap"); G.go("l2coaster", { round: 0 }); };
@@ -350,7 +348,7 @@ ${G.minaRow("Die zwei Bilder sehen gleich aus. Aber es gibt 5 Unterschiede! Tipp
       const svgs = [...el.querySelectorAll("svg.diff")];
       const found = new Set();
       const HINTS = { balloon: "Schau dir den Luftballon von dem Kind an.", flag: "Schau ganz oben auf das Karussell-Dach.", horse: "Vergleiche die Pferde im Karussell.", bird: "Schau in den Himmel rechts oben.", cone: "Schau zum Eisstand. Wie viele Kugeln hat das Eis?" };
-      const markAll = (df) => svgs.forEach((s) => s.querySelector(".marks").insertAdjacentHTML("beforeend", `<circle cx="${df.x}" cy="${df.y}" r="${df.r}" fill="none" stroke="#2F8F46" stroke-width="3.5"/>`));
+      const markAll = (df) => svgs.forEach((s) => G.markFound(s, df.x, df.y, df.r));
       svgs.forEach((s) => s.addEventListener("pointerdown", (e) => {
         const p = G.svgPoint(s, e);
         const df = DIFFS.find((d) => !found.has(d.id) && Math.hypot(d.x - p.x, d.y - p.y) < d.r + 8);
@@ -360,8 +358,7 @@ ${G.minaRow("Die zwei Bilder sehen gleich aus. Aber es gibt 5 Unterschiede! Tipp
           if (found.size === 5) { G.say("Alle 5 Unterschiede gefunden! Du hast Adleraugen."); G.sfx("ok"); $("#hint", el).hidden = true; $("#next", el).hidden = false; }
           else G.say(["Gut gesehen!", "Genau, da ist was anders!", "Super, weiter so!", "Noch einer, du schaffst das!"][found.size - 1]);
         } else {
-          s.insertAdjacentHTML("beforeend", `<circle class="ripple" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4"/>`);
-          setTimeout(() => s.querySelector(".ripple") && s.querySelector(".ripple").remove(), 600);
+          G.ripple(s, p.x, p.y);
         }
       }));
       $("#hint", el).onclick = () => { G.sfx("tap"); const d = DIFFS.find((x) => !found.has(x.id)); if (d) { G.say(HINTS[d.id]); G.speak(HINTS[d.id]); } };

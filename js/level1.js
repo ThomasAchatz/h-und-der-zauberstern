@@ -30,10 +30,7 @@ ${G.minaRow("Hilf mir, Hannah! Finde die fünf Dinge aus der Liste. Tippe sie im
       const hint = () => {
         const left = FINDS.find(([id]) => !found.has(id));
         if (!left) return;
-        const g = svg.querySelector(`[data-find="${left[0]}"]`);
-        if (!g.querySelector(".ring-hint")) g.insertAdjacentHTML("afterbegin", `<circle class="ring-hint" r="25" fill="none" stroke="#B8326F" stroke-width="3.5"/>`);
-        g.classList.add("pulse");
-        setTimeout(() => g.classList.remove("pulse"), 3500);
+        G.hintEl(svg, svg.querySelector(`[data-find="${left[0]}"]`));
         G.say(left[2]);
         G.speak(left[2]);
       };
@@ -46,6 +43,7 @@ ${G.minaRow("Hilf mir, Hannah! Finde die fünf Dinge aus der Liste. Tippe sie im
           found.add(id);
           f.classList.add("found");
           f.classList.remove("pulse");
+          G.markEl(svg, f);
           const li = $(`[data-li="${id}"]`, el);
           li.classList.add("got");
           $(".slot", li).firstElementChild.outerHTML = Art.icon(id, true);
@@ -60,8 +58,7 @@ ${G.minaRow("Hilf mir, Hannah! Finde die fünf Dinge aus der Liste. Tippe sie im
           }
         } else {
           const p = G.svgPoint(svg, e);
-          svg.insertAdjacentHTML("beforeend", `<circle class="ripple" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4"/>`);
-          setTimeout(() => svg.querySelector(".ripple") && svg.querySelector(".ripple").remove(), 600);
+          G.ripple(svg, p.x, p.y);
           misses++;
           if (misses % 4 === 0) G.say("Schau genau hin! Mit dem Tipp zeige ich dir eine Stelle.");
         }
@@ -167,7 +164,7 @@ ${G.minaRow("Cheyennes Stall ist schmutzig! Wische mit dem Finger über den Mist
 <g id="dots"></g>
 <path id="stroke" d="" fill="none" stroke="#B8326F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
 </svg></div>
-<div class="hint-line" id="hintline"><span>Fahre den Umriss nach, die rosa Punkte helfen: <b id="pct">0 %</b></span></div>
+<div class="hint-line" id="hintline"><span>Fahre die rosa Punkte nach: <b id="pct">0 %</b></span></div>
 <div class="palette grid" id="palette" hidden>${COLORS.map(([c, n], i) => `<button class="sw" data-c="${c}" aria-label="${n}" aria-pressed="${i === 0}" style="background:${c}"></button>`).join("")}</div>
 ${G.minaRow("Das ist Cheyenne! Fahre ihren Umriss mit dem Finger nach.")}
 <div class="actions"><button class="btn ghost" id="again">Nochmal</button><button class="btn" id="next" hidden>Weiter</button></div>`,

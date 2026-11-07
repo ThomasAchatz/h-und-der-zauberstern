@@ -48,7 +48,6 @@ svg { display: block; }
 .mina-row { display: flex; align-items: center; gap: 10px; }
 .mina-ico { flex: none; width: 52px; height: 52px; border-radius: 26px; background: #EFE4FF; border: 2px solid #D3C2F5; padding: 4px; }
 .bubble { flex: 1; background: #fff; border: 2px solid var(--line); border-radius: 18px; padding: 6px 14px; font-size: 15.5px; line-height: 20px; height: 86px; overflow: hidden; display: flex; align-items: center; }
-.bubble.long { font-size: 14px; line-height: 17px; }
 .speak { flex: none; width: 48px; height: 48px; border-radius: 24px; border: 0; background: var(--pink); display: grid; place-items: center; cursor: pointer; padding: 0; }
 
 /* Titel */
@@ -83,12 +82,12 @@ svg { display: block; }
 .map-title { text-align: center; font-size: 22px; font-weight: 600; color: var(--plum); }
 
 /* Find-Spiel */
-.find .mark { opacity: 0; transition: opacity .2s; }
-.find.found .mark { opacity: 1; }
 .find { cursor: pointer; }
-.find.pulse > :not(.mark):not(circle) { animation: wob .5s ease-in-out 6; transform-box: fill-box; transform-origin: center; }
-.find .ring-hint { opacity: 0; }
-.find.pulse .ring-hint { opacity: 1; animation: ringp 1s ease-in-out infinite; }
+.find.pulse > .item { animation: wob .5s ease-in-out 6; transform-box: fill-box; transform-origin: center; }
+.fx { pointer-events: none; }
+.hint-ring { animation: ringp 1s ease-in-out infinite; }
+.found-mark { animation: pop .3s ease-out; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
 @keyframes ringp { 50% { opacity: .3; } }
 @keyframes wob { 25% { transform: scale(1.35) rotate(-8deg); } 75% { transform: scale(1.35) rotate(8deg); } }
 .finds { list-style: none; margin: 0; padding: 0; display: flex; justify-content: space-between; }
@@ -97,8 +96,10 @@ svg { display: block; }
 .finds li.got .slot { background: #DDF1DE; border-color: var(--green); }
 .finds .badge { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; border-radius: 10px; background: var(--green); display: none; place-items: center; }
 .finds li.got .badge { display: grid; }
-.ripple { fill: none; stroke: #fff; stroke-width: 3; opacity: .9; animation: rip .5s ease-out forwards; pointer-events: none; }
-@keyframes rip { to { r: 26; opacity: 0; } }
+
+
+.ripple { fill: none; stroke: #fff; stroke-width: 3; pointer-events: none; animation: rip .5s ease-out forwards; }
+@keyframes rip { from { transform: scale(.2); opacity: .95; } to { transform: scale(1); opacity: 0; } }
 
 /* Ausmisten */
 .pile { pointer-events: none; }
@@ -156,3 +157,10 @@ svg { display: block; }
 .coin svg { width: 100%; height: 100%; }
 .coin:active { transform: scale(.92); }
 .tcoin { cursor: pointer; }
+
+/* Neu beginnen */
+.link-btn.small { font-size: 14px; min-height: 36px; opacity: .8; }
+.reset { justify-content: space-between; }
+.reset .art { flex: 1; min-height: 0; }
+.reset .art svg { width: 100%; height: 100%; border-radius: 24px; }
+.actions.col { flex-direction: column; }

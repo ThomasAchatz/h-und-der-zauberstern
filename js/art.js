@@ -183,8 +183,8 @@ ${tack ? `<g data-part="halter"><path class="s" d="M343 101L333 137M338 119L306 
 <path d="M-1.5 4.5L0 6L1.5 4.5" stroke="#B0505A" stroke-width="1" fill="none"/>`;
 
   const findItem = (id, cx, cy, inner) => `<g class="find" data-find="${id}" transform="translate(${cx} ${cy})">
-<circle r="26" fill="transparent"/>${inner}
-<g class="mark"><circle r="22" fill="none" stroke="#2F8F46" stroke-width="3.5"/><circle cx="17" cy="-17" r="9.5" fill="#2F8F46"/><path d="M12.5 -17l3.4 3.4 6-6.6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+<circle r="26" fill="transparent"/><g class="item">${inner}</g>
+</g>`;
 
   const farm = (hs) => `<svg id="scene" class="scene" viewBox="0 -40 360 440" role="img" aria-label="Bauernhof mit Scheune und Weide. Im Bild verstecken sich fünf Dinge.">
 <rect y="-40" width="360" height="440" fill="url(#g-sky)"/>${sunAndClouds()}${meadow()}

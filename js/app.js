@@ -50,10 +50,16 @@ const Game = (() => {
       speechSynthesis.speak(u);
     } catch (e) { /* egal */ }
   };
+  /* Schrift in der Sprechblase verkleinern, bis der Text ganz hineinpasst */
+  const fitBubble = (b) => {
+    b.style.fontSize = ""; b.style.lineHeight = "";
+    let f = 15.5;
+    while (b.scrollHeight > b.clientHeight + 1 && f > 12) { f -= 0.5; b.style.fontSize = f + "px"; b.style.lineHeight = Math.round(f * 1.22) + "px"; }
+  };
   const say = (text) => {
     lastText = text;
     const b = $("#bubble");
-    if (b) { b.textContent = text; b.classList.toggle("long", text.length > 80); }
+    if (b) { b.textContent = text; fitBubble(b); }
   };
 
   /* ---------- Bausteine ---------- */
@@ -61,12 +67,57 @@ const Game = (() => {
   const soundBtn = () => `<button class="icon-btn" data-act="sound" aria-label="Ton an oder aus" aria-pressed="${state.sound}">${speakerSvg("#7A2455")}</button>`;
   const top = (label) => `<div class="top"><div class="chip">${label}</div>${soundBtn()}</div>`;
   const steps = (now, total, label) => `<div class="steps">${Array.from({ length: total }, (_, i) => `<i class="${i < now ? "done" : i === now ? "now" : ""}"></i>`).join("")}<span>${label}</span></div>`;
-  const minaRow = (text) => `<div class="mina-row"><div class="mina-ico">${Art.minaFace()}</div><div class="bubble${text.length > 80 ? " long" : ""}" id="bubble">${text}</div><button class="speak" data-act="speak" aria-label="Vorlesen">${speakerSvg()}</button></div>`;
+  const minaRow = (text) => `<div class="mina-row"><div class="mina-ico">${Art.minaFace()}</div><div class="bubble" id="bubble">${text}</div><button class="speak" data-act="speak" aria-label="Vorlesen">${speakerSvg()}</button></div>`;
   const starsRow = () => `<svg aria-hidden="true" viewBox="0 0 130 24" width="130" height="24">${state.stars.map((on, i) => `<g transform="translate(${13 + i * 26} 12)"><polygon points="${Art.starPts(10)}" fill="${on ? "url(#g-star)" : "none"}" stroke="${on ? "#D99A1E" : "#B8326F"}" stroke-width="1.8" stroke-linejoin="round"/></g>`).join("")}</svg>`;
   const svgPoint = (svg, e) => {
     const pt = svg.createSVGPoint();
     pt.x = e.clientX; pt.y = e.clientY;
     return pt.matrixTransform(svg.getScreenCTM().inverse());
+  };
+  /* Saubere Markierungen: immer in einer eigenen obersten Ebene, unabhängig von Skalierung */
+  const NS = "http://www.w3.org/2000/svg";
+  const fx = (svg) => {
+    let g = svg.querySelector(":scope > g.fx");
+    if (!g) { g = document.createElementNS(NS, "g"); g.setAttribute("class", "fx"); svg.appendChild(g); }
+    return g;
+  };
+  const boxOf = (svg, el) => {
+    const r = el.getBoundingClientRect();
+    const m = svg.getScreenCTM().inverse();
+    const a = new DOMPoint(r.left, r.top).matrixTransform(m);
+    const b = new DOMPoint(r.right, r.bottom).matrixTransform(m);
+    return { cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2, w: b.x - a.x, h: b.y - a.y };
+  };
+  const radius = (b) => Math.max(18, Math.min(34, Math.max(b.w, b.h) / 2 + 5));
+  const markFound = (svg, cx, cy, r) => {
+    const bx = cx + r * 0.72, by = cy - r * 0.72;
+    fx(svg).insertAdjacentHTML("beforeend", `<g class="found-mark" style="transform-origin:${cx.toFixed(1)}px ${cy.toFixed(1)}px">
+<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#fff" stroke-width="7" stroke-opacity=".85"/>
+<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#2F8F46" stroke-width="3.5"/>
+<circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="9.5" fill="#2F8F46" stroke="#fff" stroke-width="2"/>
+<path d="M${(bx - 4.4).toFixed(1)} ${by.toFixed(1)}l3 3 5.6-6.2" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>`);
+  };
+  const markEl = (svg, el) => {
+    if (el._hint) { el._hint.remove(); el._hint = null; }
+    if (el.dataset.mark) { const [cx, cy, r] = el.dataset.mark.split(",").map(Number); markFound(svg, cx, cy, r); return; }
+    const b = boxOf(svg, el.querySelector(".item") || el);
+    markFound(svg, b.cx, b.cy, radius(b));
+  };
+  const hintEl = (svg, el) => {
+    if (el._hint) el._hint.remove();
+    let b, r;
+    if (el.dataset.mark) { const [cx, cy, rr] = el.dataset.mark.split(",").map(Number); b = { cx, cy }; r = rr + 3; }
+    else { b = boxOf(svg, el.querySelector(".item") || el); r = radius(b) + 3; }
+    fx(svg).insertAdjacentHTML("beforeend", `<circle class="hint-ring" cx="${b.cx.toFixed(1)}" cy="${b.cy.toFixed(1)}" r="${r.toFixed(1)}" fill="none" stroke="#B8326F" stroke-width="3.5" stroke-dasharray="6 5"/>`);
+    const ring = fx(svg).lastElementChild;
+    el._hint = ring;
+    el.classList.add("pulse");
+    setTimeout(() => { ring.remove(); if (el._hint === ring) el._hint = null; el.classList.remove("pulse"); }, 3500);
+  };
+  const ripple = (svg, x, y) => {
+    fx(svg).insertAdjacentHTML("beforeend", `<circle class="ripple" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="18" style="transform-origin:${x.toFixed(1)}px ${y.toFixed(1)}px"/>`);
+    const c = fx(svg).lastElementChild;
+    setTimeout(() => c.remove(), 550);
   };
   const confetti = (root) => {
     const box = document.createElement("div");
@@ -100,6 +151,7 @@ const Game = (() => {
       if (act.dataset.act === "speak") speak(lastText || ($("#bubble") && $("#bubble").textContent));
     });
     lastText = ($("#bubble") && $("#bubble").textContent) || "";
+    if ($("#bubble")) fitBubble($("#bubble"));
     if (s.mount) s.mount(el);
   };
 
@@ -108,8 +160,30 @@ const Game = (() => {
     cls: "title",
     html: `<div class="head"><h1>Hannah und der Zauberstern</h1><p>Hilf Mina, die fünf Sternstücke zu finden!</p></div>
 <div class="art">${Art.titleScene(state.horse)}</div>
-<div class="foot"><button class="btn big" id="play">Los geht's</button><div class="stars-line">${starsRow()}<span>${state.stars.filter(Boolean).length} von 5 Sternstücken</span></div></div>`,
-    mount(el) { $("#play", el).onclick = () => { sfx("tap"); go(state.introSeen ? "map" : "intro", { i: 0 }); }; },
+<div class="foot"><button class="btn big" id="play">${state.introSeen ? "Weiterspielen" : "Los geht's"}</button><div class="stars-line">${starsRow()}<span>${state.stars.filter(Boolean).length} von 5 Sternstücken</span></div>
+${state.introSeen ? `<button class="link-btn small" id="reset">Neu beginnen</button>` : ""}</div>`,
+    mount(el) {
+      $("#play", el).onclick = () => { sfx("tap"); go(state.introSeen ? "map" : "intro", { i: 0 }); };
+      if ($("#reset", el)) $("#reset", el).onclick = () => { sfx("tap"); go("reset"); };
+    },
+  });
+
+  /* ---------- Neu beginnen ---------- */
+  screens.reset = () => ({
+    cls: "reset",
+    html: `<h1>Neu beginnen?</h1><div class="art">${Art.brokenStar()}</div>
+${minaRow("Willst du das ganze Abenteuer nochmal von vorne spielen? Dann sind alle Sternstücke und Cheyennes Farben weg.")}
+<div class="actions col"><button class="btn" id="no">Nein, weiterspielen</button><button class="btn ghost" id="yes">Ja, von vorne spielen</button></div>`,
+    mount(el) {
+      $("#no", el).onclick = () => { sfx("tap"); go("title"); };
+      $("#yes", el).onclick = () => {
+        const sound = state.sound;
+        Object.assign(state, JSON.parse(JSON.stringify(defaults)), { sound, horse: Object.assign({}, Art.HORSE_DEFAULT) });
+        save();
+        sfx("ok");
+        go("title");
+      };
+    },
   });
 
   /* ---------- Einleitung ---------- */
@@ -197,7 +271,8 @@ ${minaRow(WINTEXT[level])}
   const start = () => {
     document.body.insertAdjacentHTML("afterbegin", Art.defs());
     go("title");
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const b = $("#bubble"); if (b) fitBubble(b); });
   };
 
-  return { ALL, state, save, screens, go, say, speak, sfx, start, top, steps, minaRow, svgPoint, confetti, $, speakerSvg, LEVELS };
+  return { markFound, markEl, hintEl, ripple, ALL, state, save, screens, go, say, speak, sfx, start, top, steps, minaRow, svgPoint, confetti, $, speakerSvg, LEVELS };
 })();
