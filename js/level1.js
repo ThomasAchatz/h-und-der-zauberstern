@@ -13,12 +13,12 @@
     ["cat", "Katze", "Die Katze schaut aus dem Fenster der Scheune."],
     ["star", "Stern", "Der Stern funkelt oben im Baum."],
   ];
-  const CHEERS = ["Super gefunden!", "Toll, Hanna!", "Genau das ist es!", "Wow, du bist schnell!", "Prima, weiter so!"];
+  const CHEERS = ["Super gefunden!", "Toll, Hannah!", "Genau das ist es!", "Wow, du bist schnell!", "Prima, weiter so!"];
 
   G.screens.l1search = () => ({
     html: `${G.top(LABEL)}${G.steps(0, 3, "Suchen")}
 <div class="stage">${Art.farm(G.state.horse)}</div>
-${G.minaRow("Hilf mir, Hanna! Finde die fünf Dinge aus der Liste. Tippe sie im Bild an.")}
+${G.minaRow("Hilf mir, Hannah! Finde die fünf Dinge aus der Liste. Tippe sie im Bild an.")}
 <ul class="finds">${FINDS.map(([id, name]) => `<li data-li="${id}"><div class="slot">${Art.icon(id, false)}<span class="badge"><svg aria-hidden="true" viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 L8.5 14 L15 6.5"/></svg></span></div><span>${name}</span></li>`).join("")}</ul>
 <div class="actions"><button class="btn ghost" id="hint">Tipp von Mina</button><button class="btn" id="next" hidden>Weiter</button></div>`,
     mount(el) {
@@ -148,19 +148,27 @@ ${G.minaRow("Cheyennes Stall ist schmutzig! Wische mit dem Finger über den Mist
   });
 
   /* ---------- 3) Cheyenne nachzeichnen und ausmalen ---------- */
-  const COLORS = [["#8A552B", "Braun"], ["#C4632D", "Fuchsrot"], ["#2B2B2B", "Schwarz"], ["#FFFFFF", "Weiß"], ["#9AA1A8", "Grau"], ["#F29AC1", "Rosa"], ["#9B7BD4", "Lila"], ["#6BB7E8", "Blau"]];
+  const COLORS = [["#8A552B", "Braun"], ["#C4632D", "Fuchsrot"], ["#3B2314", "Dunkelbraun"], ["#2B2B2B", "Schwarz"], ["#9AA1A8", "Grau"], ["#FFFFFF", "Weiß"], ["#F3E3C3", "Creme"],
+    ["#FFD23F", "Gelb"], ["#F28C28", "Orange"], ["#D93B36", "Rot"], ["#F29AC1", "Rosa"], ["#9B7BD4", "Lila"], ["#3D7BD9", "Blau"], ["#9ED3F1", "Hellblau"], ["#5FA450", "Grün"], ["#B9DE92", "Hellgrün"]];
+  const HORSE_PARTS = ["body", "mane", "tail", "hooves", "blaze", "socks", "halter", "pad", "saddle"];
+  const WHITE = Object.fromEntries(HORSE_PARTS.map((k) => [k, "#FFFFFF"]));
 
   G.screens.l1trace = () => ({
     html: `${G.top(LABEL)}${G.steps(2, 3, "Zeichnen")}
 <div class="stage paper"><svg id="tsvg" viewBox="0 0 400 320" role="img" aria-label="Umriss von Cheyenne zum Nachzeichnen">
-<g id="bg" style="display:none"><rect width="400" height="320" fill="url(#g-sky)"/><path d="M0 240Q100 214 200 236T400 226V320H0z" fill="url(#g-hill)"/><path d="M0 284Q120 262 260 282T400 272V320H0z" fill="url(#g-grass)"/></g>
-<g id="paint" style="display:none">${Art.horseG({ body: "#FFFFFF", mane: "#FFFFFF", stroke: "#6B5560" })}</g>
+<g id="bg" style="display:none" stroke="#6B5560" stroke-width="2"><rect data-part="sky" class="f" width="400" height="320" fill="#FFFFFF" stroke="none"/>
+<g data-part="sun"><circle class="f" cx="346" cy="44" r="24" fill="#FFFFFF"/></g>
+<g data-part="cloud"><path class="f" d="M30 52a14 14 0 0 1 22-12a18 18 0 0 1 32 4a12 12 0 0 1 2 22H34a12 12 0 0 1-4-14zM150 30a10 10 0 0 1 16-8a14 14 0 0 1 24 4a9 9 0 0 1 0 17h-36a9 9 0 0 1-4-13z" fill="#FFFFFF"/></g>
+<g data-part="hill"><path class="f" d="M0 240Q100 206 200 236T400 222V320H0z" fill="#FFFFFF"/></g>
+<g data-part="grass"><path class="f" d="M0 286Q120 262 260 282T400 272V320H0z" fill="#FFFFFF"/></g>
+<g data-part="flower">${[[30, 300], [180, 296], [366, 296], [60, 254]].map(([x, y]) => `<g transform="translate(${x} ${y})"><circle class="f" cx="0" cy="-7" r="5" fill="#FFFFFF"/><circle class="f" cx="7" cy="0" r="5" fill="#FFFFFF"/><circle class="f" cx="0" cy="7" r="5" fill="#FFFFFF"/><circle class="f" cx="-7" cy="0" r="5" fill="#FFFFFF"/><circle cx="0" cy="0" r="3.5" fill="#FFC93C" pointer-events="none"/></g>`).join("")}</g></g>
+<g id="paint" style="display:none">${Art.horseG(Object.assign({ stroke: "#6B5560" }, WHITE))}</g>
 <path id="outline" d="${Art.HORSE_BODY}" fill="none" stroke="#C9B8C2" stroke-width="3" stroke-dasharray="7 6"/>
 <g id="dots"></g>
 <path id="stroke" d="" fill="none" stroke="#B8326F" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>
 </svg></div>
 <div class="hint-line" id="hintline"><span>Fahre den Umriss nach, die rosa Punkte helfen: <b id="pct">0 %</b></span></div>
-<div class="palette" id="palette" hidden>${COLORS.map(([c, n], i) => `<button class="sw" data-c="${c}" aria-label="${n}" aria-pressed="${i === 0}" style="background:${c}"></button>`).join("")}</div>
+<div class="palette grid" id="palette" hidden>${COLORS.map(([c, n], i) => `<button class="sw" data-c="${c}" aria-label="${n}" aria-pressed="${i === 0}" style="background:${c}"></button>`).join("")}</div>
 ${G.minaRow("Das ist Cheyenne! Fahre ihren Umriss mit dem Finger nach.")}
 <div class="actions"><button class="btn ghost" id="again">Nochmal</button><button class="btn" id="next" hidden>Weiter</button></div>`,
     mount(el) {
@@ -191,7 +199,7 @@ ${G.minaRow("Das ist Cheyenne! Fahre ihren Umriss mit dem Finger nach.")}
       const update = () => {
         const v = Math.round((samples.filter((s) => s.hit).length / N) * 100);
         pct.textContent = v + " %";
-        if (v >= 30 && said < 1) { said = 1; G.say("Das sieht schon gut aus, Hanna! Weiter so."); }
+        if (v >= 30 && said < 1) { said = 1; G.say("Das sieht schon gut aus, Hannah! Weiter so."); }
         if (v >= 65 && said < 2) { said = 2; G.say("Fast geschafft! Nur noch ein Stück."); }
         if (v >= 88 && phase === 1) toColoring();
       };
@@ -204,35 +212,45 @@ ${G.minaRow("Das ist Cheyenne! Fahre ihren Umriss mit dem Finger nach.")}
         dotsG.style.display = "none";
         strokeEl.style.display = "none";
         const paint = $("#paint", el);
-        $("#bg", el).style.display = "";
+        const bg = $("#bg", el);
+        bg.style.display = "";
         paint.style.display = "";
         const hs = G.state.horse;
-        const setPart = (part, color) => {
-          if (part === "body") $(".horse-body", paint).setAttribute("fill", color);
-          else paint.querySelectorAll(`[data-part="${part}"] path`).forEach((p) => p.setAttribute("fill", color));
+        const colored = new Set();
+        const setPart = (root, part, color) => {
+          root.querySelectorAll(`[data-part="${part}"].f, [data-part="${part}"] .f`).forEach((p) => p.setAttribute("fill", color));
+          root.querySelectorAll(`[data-part="${part}"] .s`).forEach((p) => p.setAttribute("stroke", color));
         };
-        $("#hintline", el).textContent = "Tippe auf Körper, Mähne oder Schweif und mal Cheyenne an!";
+        $("#hintline", el).innerHTML = `<span>Farbe wählen, Bereich antippen: <b id="cnt">0 von 15</b></span>`;
         $("#palette", el).hidden = false;
         $("#again", el).hidden = true;
         $("#next", el).hidden = false;
         $("#next", el).textContent = "Fertig";
-        G.say("Geschafft! Jetzt darfst du Cheyenne anmalen. Welche Farbe hat sie?");
-        let color = hs.body;
-        el.querySelectorAll(".sw").forEach((b) => {
-          b.setAttribute("aria-pressed", b.dataset.c.toLowerCase() === color.toLowerCase());
+        G.say("Geschafft! Jetzt mal Cheyenne an: Fell, Mähne, Hufe, Sattel und mehr. Auch der Himmel will Farbe!");
+        let color = COLORS[0][0];
+        el.querySelectorAll(".sw").forEach((b, i) => {
+          b.setAttribute("aria-pressed", i === 0);
           b.onclick = () => {
             color = b.dataset.c;
             el.querySelectorAll(".sw").forEach((o) => o.setAttribute("aria-pressed", o === b));
             G.sfx("tap");
           };
         });
-        paint.addEventListener("pointerdown", (e) => {
+        const total = 15;
+        svg.addEventListener("pointerdown", (e) => {
           const part = e.target.closest("[data-part]");
           if (!part) return;
           const name = part.dataset.part;
-          setPart(name, color);
-          if (name === "body") hs.body = color; else hs.mane = color;
-          G.save();
+          const root = HORSE_PARTS.includes(name) ? paint : bg;
+          setPart(root, name, color);
+          if (HORSE_PARTS.includes(name)) { hs[name] = color; G.save(); }
+          if (!colored.has(name)) {
+            colored.add(name);
+            $("#cnt", el).textContent = `${colored.size} von ${total}`;
+            if (colored.size === 5) G.say("Wunderschön! Hast du schon die Hufe und die Blesse im Gesicht entdeckt?");
+            if (colored.size === 10) G.say("So bunt! Fehlen noch Wolken, Blumen oder die Strümpfe an den Beinen?");
+            if (colored.size === total) { G.say("Alles ausgemalt! Cheyenne ist jetzt ein echtes Kunstwerk."); G.sfx("ok"); }
+          }
           G.sfx("find");
         });
       };

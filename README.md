@@ -1,14 +1,17 @@
-# Hanna und der Zauberstern
+# Hannah und der Zauberstern
 
-Ein kleines Browser-Spiel für Hanna (8): Mit der Fee Mina und ihrem Pferd Cheyenne
+Ein kleines Browser-Spiel für Hannah (8): Mit der Fee Mina und ihrem Pferd Cheyenne
 sucht sie die fünf Sternstücke des zerbrochenen Zauberstern. Läuft auf dem Handy im
 Browser, ohne Installation und ohne Anmeldung. Der Spielstand bleibt lokal im Gerät.
 
 ## Stand
 
 - Titelbild, Einleitung mit Mina, Weltkarte mit fünf Etappen
-- Level 1 (Bauernhof): Suchbild, Stall ausmisten, Cheyenne nachzeichnen und ausmalen
-- Level 2 bis 5 (Europapark, Zauber-Schule mit Rechenaufgaben, Backwelt, Fee-Schloss) folgen
+- Level 1 (Bauernhof): Suchbild, Stall ausmisten, Cheyenne nachzeichnen und ausmalen (15 Bereiche, 16 Farben)
+- Level 2 (Europapark): Mama und Michael im Gewimmel nach Hinweisen finden, zwei Achterbahnen nachzeichnen und mitfahren, 5 Unterschiede am Karussell
+- Level 3 (Zauber-Schule, 2. Klasse Volksschule Österreich): 8 Zaubertränke mit Plus und Minus bis 100 (mit und ohne Zehnerübergang, Ergänzen), 6 Zauberkugeln als erste Malrechnungen mit Bildern, Zauberladen mit Euro und Cent. Aufgaben werden bei jedem Spiel neu gewürfelt.
+- Level 4 und 5 (Backwelt, Fee-Schloss) folgen
+- Zum Testen schaltet `?alle` am Ende der Adresse alle fertigen Level frei
 
 ## Lokal testen
 
@@ -22,6 +25,6 @@ Dann `http://localhost:8000` am Handy-Format im Browser öffnen.
 
 - `index.html`: Einstieg
 - `css/style.css`: Gestaltung
-- `js/art.js`: alle Grafiken als SVG (Hanna, Mina, Cheyenne, Szenen)
+- `js/art.js`: alle Grafiken als SVG (Hannah, Mina, Cheyenne, Szenen)
 - `js/app.js`: Navigation, Speicherstand, Titel, Einleitung, Karte, Sieg
-- `js/level1.js`: die drei Aufgaben von Level 1
+- `js/level1.js`, `js/level2.js`, `js/level3.js`: die Aufgaben der Level

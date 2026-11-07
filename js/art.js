@@ -1,5 +1,5 @@
 "use strict";
-/* Alle Grafiken als SVG-Strings: Hanna, Mina, Cheyenne und die Szenen. */
+/* Alle Grafiken als SVG-Strings: Hannah, Mina, Cheyenne und die Szenen. */
 const Art = (() => {
   const starPts = (r) => {
     const p = [];
@@ -40,7 +40,7 @@ const Art = (() => {
 <clipPath id="c-horse"><path d="${HORSE_BODY}"/></clipPath>
 </defs></svg>`;
 
-  /* ---------- Hanna ---------- */
+  /* ---------- Hannah ---------- */
   const hannaG = () => `
 <ellipse cx="100" cy="402" rx="54" ry="7" fill="#000" opacity=".16"/>
 <path d="M64 92C58 48 80 28 100 28s42 20 36 64l10 112c2 20-8 34-18 26V150H72v82c-10 8-20-6-18-26z" fill="url(#g-hair)"/>
@@ -81,7 +81,7 @@ const Art = (() => {
 <circle cx="90" cy="98" r="1" fill="#C98F6E" opacity=".4"/><circle cx="94" cy="101" r="1" fill="#C98F6E" opacity=".4"/><circle cx="110" cy="98" r="1" fill="#C98F6E" opacity=".4"/><circle cx="106" cy="101" r="1" fill="#C98F6E" opacity=".4"/>
 <path d="M90 112q10 8 20 0" stroke="#C0606C" stroke-width="2.6" fill="none" stroke-linecap="round"/>
 <path d="M92 113q8 3 16 0" fill="#D98089" opacity=".45"/>`;
-  const hanna = (cls = "") => `<svg class="${cls}" viewBox="0 0 200 410" role="img" aria-label="Hanna">${hannaG()}</svg>`;
+  const hanna = (cls = "") => `<svg class="${cls}" viewBox="0 0 200 410" role="img" aria-label="Hannah">${hannaG()}</svg>`;
 
   /* ---------- Mina, die Fee ---------- */
   const minaG = (noStar) => `
@@ -107,26 +107,39 @@ ${noStar ? "" : `<circle cx="90" cy="42" r="15" fill="url(#g-glow)"/><g transfor
 
   /* ---------- Cheyenne (Koordinaten 0..400 x 0..320, Blick nach rechts) ---------- */
   const HORSE_BODY = "M352 112C358 119 358 131 350 137C343 143 333 142 327 137C318 134 309 130 301 127C297 152 289 178 280 198C275 210 270 222 266 232L265 262L265 290L272 306L248 306L250 290L249 262L248 238C247 230 243 226 240 234L240 262L241 290L246 306L222 306L224 290L224 262L226 228C210 232 176 232 146 220L142 250L140 290L146 306L122 306L124 290L124 262L120 234C118 226 112 224 108 234L108 262L108 290L112 306L88 306L90 290L90 262L84 238C80 226 70 202 62 178C56 158 56 136 62 120C66 108 76 100 92 98C130 104 170 102 214 92C240 84 262 62 282 48L288 26L297 46L300 50C312 62 330 90 352 112Z";
+  /* Bereiche zum Ausmalen. Fehlt eine Farbe, nimmt das Abzeichen die Fellfarbe. */
+  const HORSE_DEFAULT = { body: "#8A552B", mane: "#3B2314", tail: "#3B2314", hooves: "#2B1C12", blaze: "", socks: "", halter: "#B8326F", pad: "#F29AC1", saddle: "#6B4423" };
   const horseG = (o = {}) => {
-    const body = o.body || "url(#g-horse)";
-    const mane = o.mane || "#3B2314";
+    const h = Object.assign({}, HORSE_DEFAULT, o);
+    const body = o.body ? h.body : "url(#g-horse)";
+    const tail = o.tail || o.mane || h.tail;
+    const blaze = h.blaze || body;
+    const socks = h.socks || body;
     const st = o.stroke ? ` stroke="${o.stroke}" stroke-width="3" stroke-linejoin="round"` : "";
+    const st2 = o.stroke ? ` stroke="${o.stroke}" stroke-width="2" stroke-linejoin="round"` : ` stroke="#000" stroke-opacity=".18" stroke-width="1.5"`;
+    const tack = o.tack !== false;
     return `
-<g data-part="tail"><path d="M64 112C40 120 28 160 36 214C40 230 48 238 52 224C50 190 56 150 70 132Z" fill="${mane}"${st}/></g>
+<g data-part="tail"><path class="f" d="M64 112C40 120 28 160 36 214C40 230 48 238 52 224C50 190 56 150 70 132Z" fill="${tail}"${st}/></g>
 <g data-part="body">
- <path class="horse-body" d="${HORSE_BODY}" fill="${body}"${st}/>
+ <path class="horse-body f" d="${HORSE_BODY}" fill="${body}"${st}/>
  <g clip-path="url(#c-horse)" pointer-events="none">
-  <ellipse cx="170" cy="240" rx="130" ry="34" fill="#000" opacity=".16"/>
+  <ellipse cx="170" cy="240" rx="130" ry="34" fill="#000" opacity=".14"/>
   <ellipse cx="170" cy="104" rx="110" ry="14" fill="#fff" opacity=".16"/>
-  <rect x="222" y="226" width="20" height="90" fill="#000" opacity=".18"/>
-  <rect x="120" y="216" width="22" height="100" fill="#000" opacity=".18"/>
+  <rect x="222" y="226" width="20" height="90" fill="#000" opacity=".15"/>
+  <rect x="120" y="216" width="22" height="100" fill="#000" opacity=".15"/>
   <ellipse cx="330" cy="116" rx="26" ry="18" fill="#fff" opacity=".1"/>
-  <path d="M0 296H400V320H0z" fill="#2B1C12" opacity=".0"/>
-  <g fill="#2B1C12"><path d="M247 294H273V310H247z"/><path d="M221 294H247V310H221z"/><path d="M121 294H147V310H121z"/><path d="M87 294H113V310H87z"/></g>
  </g>
 </g>
-<g data-part="mane"><path d="M286 46C264 62 242 86 214 96C226 110 250 98 268 80C280 68 290 58 298 50Z" fill="${mane}"${st}/><path d="M296 48C301 62 305 71 301 82C292 73 290 60 296 48Z" fill="${mane}"${st}/></g>
-<circle cx="322" cy="92" r="4.2" fill="#1B110B"/><circle cx="323.4" cy="90.8" r="1.3" fill="#fff"/>
+<g clip-path="url(#c-horse)">
+ <g data-part="socks"><path class="f" d="M247 270H273V294H247zM221 270H247V294H221zM121 270H147V294H121zM87 270H113V294H87z" fill="${socks}"${st2}/></g>
+ <g data-part="hooves"><path class="f" d="M247 294H273V310H247zM221 294H247V310H221zM121 294H147V310H121zM87 294H113V310H87z" fill="${h.hooves}"${st2}/></g>
+ <g data-part="blaze"><path class="f" d="M300 54Q318 70 338 102Q347 115 352 126Q345 131 338 124Q322 100 301 66Z" fill="${blaze}"${st2}/></g>
+</g>
+${tack ? `<g data-part="pad"><path class="f" d="M170 98Q204 96 238 86L246 150Q212 164 166 156Z" fill="${h.pad}"${st}/><path d="M176 148Q210 154 240 142" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.5" stroke-dasharray="5 4" pointer-events="none"/></g>
+<g data-part="saddle"><path class="f" d="M184 98Q186 84 198 88Q214 94 226 84Q236 80 238 92L238 126Q210 136 184 126Z" fill="${h.saddle}"${st}/><path d="M200 128L198 172" stroke="#4A2F1A" stroke-width="4" pointer-events="none"/><rect x="190" y="170" width="16" height="9" rx="3" fill="#B9BEC4" stroke="#6F757B" stroke-width="1.2" pointer-events="none"/></g>` : ""}
+<g data-part="mane"><path class="f" d="M286 46C264 62 242 86 214 96C226 110 250 98 268 80C280 68 290 58 298 50Z" fill="${h.mane}"${st}/><path class="f" d="M296 48C301 62 305 71 301 82C292 73 290 60 296 48Z" fill="${h.mane}"${st}/></g>
+${tack ? `<g data-part="halter"><path class="s" d="M343 101L333 137M338 119L306 100L297 58M306 100L311 128" fill="none" stroke="${h.halter}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="306" cy="100" r="4" fill="#D9DDE1" stroke="#6F757B" stroke-width="1.2" pointer-events="none"/></g>` : ""}
+<circle cx="322" cy="88" r="4.2" fill="#1B110B" pointer-events="none"/><circle cx="323.4" cy="86.8" r="1.3" fill="#fff" pointer-events="none"/>
 <ellipse cx="346" cy="124" rx="3" ry="2" fill="#1B110B" opacity=".6" pointer-events="none"/>
 `;
   };
@@ -210,7 +223,7 @@ ${findItem("star", 324, 112, star(10))}
 <path d="M-6 -6l12 -2M-12 4l10 2M4 4l10 -2" stroke="#E0C070" stroke-width="2" stroke-linecap="round"/></g></g>`;
 
   /* ---------- Titel-, Einleitungs- und Siegesbilder ---------- */
-  const titleScene = (hs) => `<svg class="scene" viewBox="0 -40 360 440" role="img" aria-label="Hanna mit der Fee Mina und ihrem Pferd Cheyenne auf der Wiese">
+  const titleScene = (hs) => `<svg class="scene" viewBox="0 -40 360 440" role="img" aria-label="Hannah mit der Fee Mina und ihrem Pferd Cheyenne auf der Wiese">
 <rect y="-40" width="360" height="440" fill="url(#g-sky)"/>${sunAndClouds()}${meadow()}${flowers()}
 <g transform="translate(176 232) scale(.46)">${horseG(hs)}</g>
 <g transform="translate(36 98) scale(.74)">${hannaG()}</g>
@@ -231,7 +244,7 @@ ${findItem("star", 324, 112, star(10))}
 <g transform="translate(180 340) rotate(160)"><path d="M0 -22L8 -6L-8 -6z" fill="url(#g-star)" stroke="#D99A1E" stroke-width="2" stroke-linejoin="round"/></g>
 </svg>`;
 
-  const winScene = (hs) => `<svg class="scene" viewBox="0 -40 360 440" role="img" aria-label="Hanna und Mina freuen sich über das Sternstück">
+  const winScene = (hs) => `<svg class="scene" viewBox="0 -40 360 440" role="img" aria-label="Hannah und Mina freuen sich über das Sternstück">
 <rect y="-40" width="360" height="440" fill="url(#g-sky)"/>${sunAndClouds()}${meadow()}
 <g transform="translate(180 120)"><circle r="96" fill="url(#g-glow)"/><g class="win-star">${star(58)}</g></g>
 <g transform="translate(34 128) scale(.68)">${hannaG()}</g>
@@ -251,5 +264,5 @@ ${findItem("star", 324, 112, star(10))}
     return `<svg aria-hidden="true" viewBox="0 0 32 32" width="30" height="30">${m[id]}</svg>`;
   };
 
-  return { defs, star, starPts, hanna, hannaG, mina, minaG, minaFace, horse, horseG, HORSE_BODY, farm, stable, zoneShape, pileShape, titleScene, brokenStar, winScene, icon };
+  return { HORSE_DEFAULT, findItem, treeG, sunAndClouds, flowers, defs, star, starPts, hanna, hannaG, mina, minaG, minaFace, horse, horseG, HORSE_BODY, farm, stable, zoneShape, pileShape, titleScene, brokenStar, winScene, icon };
 })();

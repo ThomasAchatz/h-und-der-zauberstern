@@ -3,9 +3,17 @@
 const Game = (() => {
   const KEY = "hz-save-v1";
   const LEVELS = ["Bauernhof", "Europapark", "Zauber-Schule", "Backwelt", "Fee-Schloss"];
-  const defaults = { introSeen: false, stars: [false, false, false, false, false], sound: true, horse: { body: "#8A552B", mane: "#3B2314" } };
+  const defaults = { introSeen: false, stars: [false, false, false, false, false], sound: true, horse: Object.assign({}, Art.HORSE_DEFAULT) };
   let state = JSON.parse(JSON.stringify(defaults));
-  try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) { /* ohne Speicher spielen */ }
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+    if (saved.horse && !saved.horse.tail) saved.horse.tail = saved.horse.mane;
+    Object.assign(state, saved);
+    state.horse = Object.assign({}, Art.HORSE_DEFAULT, state.horse);
+    while (state.stars.length < 5) state.stars.push(false);
+  } catch (e) { /* ohne Speicher spielen */ }
+  /* Zum Testen: ?alle schaltet alle Etappen frei */
+  const ALL = /[?&]alle\b/.test(location.search);
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* egal */ } };
 
   const screens = {};
@@ -45,7 +53,7 @@ const Game = (() => {
   const say = (text) => {
     lastText = text;
     const b = $("#bubble");
-    if (b) b.textContent = text;
+    if (b) { b.textContent = text; b.classList.toggle("long", text.length > 80); }
   };
 
   /* ---------- Bausteine ---------- */
@@ -53,7 +61,7 @@ const Game = (() => {
   const soundBtn = () => `<button class="icon-btn" data-act="sound" aria-label="Ton an oder aus" aria-pressed="${state.sound}">${speakerSvg("#7A2455")}</button>`;
   const top = (label) => `<div class="top"><div class="chip">${label}</div>${soundBtn()}</div>`;
   const steps = (now, total, label) => `<div class="steps">${Array.from({ length: total }, (_, i) => `<i class="${i < now ? "done" : i === now ? "now" : ""}"></i>`).join("")}<span>${label}</span></div>`;
-  const minaRow = (text) => `<div class="mina-row"><div class="mina-ico">${Art.minaFace()}</div><div class="bubble" id="bubble">${text}</div><button class="speak" data-act="speak" aria-label="Vorlesen">${speakerSvg()}</button></div>`;
+  const minaRow = (text) => `<div class="mina-row"><div class="mina-ico">${Art.minaFace()}</div><div class="bubble${text.length > 80 ? " long" : ""}" id="bubble">${text}</div><button class="speak" data-act="speak" aria-label="Vorlesen">${speakerSvg()}</button></div>`;
   const starsRow = () => `<svg aria-hidden="true" viewBox="0 0 130 24" width="130" height="24">${state.stars.map((on, i) => `<g transform="translate(${13 + i * 26} 12)"><polygon points="${Art.starPts(10)}" fill="${on ? "url(#g-star)" : "none"}" stroke="${on ? "#D99A1E" : "#B8326F"}" stroke-width="1.8" stroke-linejoin="round"/></g>`).join("")}</svg>`;
   const svgPoint = (svg, e) => {
     const pt = svg.createSVGPoint();
@@ -98,7 +106,7 @@ const Game = (() => {
   /* ---------- Titel ---------- */
   screens.title = () => ({
     cls: "title",
-    html: `<div class="head"><h1>Hanna und der Zauberstern</h1><p>Hilf Mina, die fünf Sternstücke zu finden!</p></div>
+    html: `<div class="head"><h1>Hannah und der Zauberstern</h1><p>Hilf Mina, die fünf Sternstücke zu finden!</p></div>
 <div class="art">${Art.titleScene(state.horse)}</div>
 <div class="foot"><button class="btn big" id="play">Los geht's</button><div class="stars-line">${starsRow()}<span>${state.stars.filter(Boolean).length} von 5 Sternstücken</span></div></div>`,
     mount(el) { $("#play", el).onclick = () => { sfx("tap"); go(state.introSeen ? "map" : "intro", { i: 0 }); }; },
@@ -106,7 +114,7 @@ const Game = (() => {
 
   /* ---------- Einleitung ---------- */
   const SLIDES = [
-    { art: () => Art.titleScene(state.horse), text: "Hallo Hanna! Ich bin Mina, eine kleine Fee. Schön, dass du da bist!" },
+    { art: () => Art.titleScene(state.horse), text: "Hallo Hannah! Ich bin Mina, eine kleine Fee. Schön, dass du da bist!" },
     { art: () => Art.brokenStar(), text: "Oje! Mein Zauberstern ist in fünf Stücke zerbrochen und überall verstreut." },
     { art: () => Art.titleScene(state.horse), text: "Hilfst du mir, sie zu finden? Auf dem Bauernhof geht es los. Cheyenne kommt auch mit!" },
   ];
@@ -126,30 +134,40 @@ const Game = (() => {
   /* ---------- Karte ---------- */
   const NODES = [[28, 82], [70, 64], [30, 47], [70, 31], [42, 13]];
   const lockSvg = `<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`;
+  const ENTRY = ["l1search", "l2find", "l3potion", null, null];
+  const isOpen = (i) => ENTRY[i] && (ALL || i === 0 || state.stars[i - 1] || state.stars[i]);
   screens.map = () => {
-    const firstOpen = state.stars.findIndex((s) => !s);
     const nodes = NODES.map(([x, y], i) => {
       const done = state.stars[i];
-      const open = i === 0 && !done;
-      const locked = i > 0 && !done;
+      const open = isOpen(i) && !done;
+      const locked = !isOpen(i) && !done;
       return `<button class="node ${done ? "done" : ""} ${open ? "open" : ""} ${locked ? "locked" : ""}" style="left:${x}%;top:${y}%" data-level="${i}" aria-label="Level ${i + 1}: ${LEVELS[i]}${locked ? ", noch gesperrt" : ""}">
 <span class="disc">${locked ? lockSvg : done ? "★" : i + 1}</span><span class="lbl">${LEVELS[i]}</span></button>`;
     }).join("");
-    const text = state.stars[0]
-      ? "Das erste Sternstück ist gefunden! Die nächsten Etappen schalten wir bald frei."
-      : "Tippe auf die 1, dann geht's los. Auf dem Bauernhof wartet Cheyenne!";
+    const next = state.stars.findIndex((s) => !s);
+    const MAPTEXT = [
+      "Tippe auf die 1, dann geht's los. Auf dem Bauernhof wartet Cheyenne!",
+      "Ein Sternstück leuchtet schon! Tippe auf die 2, wir fahren in den Europapark.",
+      "Zwei Sternstücke! Tippe auf die 3. In der Zauber-Schule wird gerechnet.",
+      "Drei Sternstücke! Die Backwelt öffnet bald ihre Türen. Versprochen!",
+      "Vier Sternstücke! Das Fee-Schloss kommt bald.",
+    ];
+    const text = next === -1 ? "Alle Sternstücke gefunden! Mein Zauberstern leuchtet wieder." : MAPTEXT[next];
+    const pos = next === -1 ? 4 : next;
+    const [hx, hy] = NODES[pos];
     return {
       cls: "map",
-      html: `${top("Hannas Reise")}
+      html: `${top("Hannahs Reise")}
 <div class="map-art"><svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M28 82C50 80 80 76 70 64C60 52 20 58 30 47C38 38 78 42 70 31C62 20 34 24 42 13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 9" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
-${nodes}<div class="map-hanna" style="left:8%;top:92%">${Art.hanna()}</div></div>
+${nodes}<div class="map-hanna" style="left:${hx + (hx < 50 ? -17 : 17)}%;top:${hy + 6}%">${Art.hanna()}</div></div>
 ${minaRow(text)}`,
       mount(el) {
         el.querySelectorAll(".node").forEach((n) => {
           n.onclick = () => {
             const i = +n.dataset.level;
-            if (i === 0) { sfx("tap"); go("l1search"); }
-            else { sfx("miss"); say(state.stars[i] ? "Das hast du schon geschafft!" : `${LEVELS[i]}: Diese Etappe schalten wir bald frei. Versprochen!`); }
+            if (isOpen(i)) { sfx("tap"); go(ENTRY[i]); }
+            else if (!ENTRY[i]) { sfx("miss"); say(`${LEVELS[i]}: Diese Etappe bauen wir gerade. Bald geht es weiter!`); }
+            else { sfx("miss"); say(`Zuerst brauchen wir das Sternstück aus Level ${i}. Dann geht es hier weiter!`); }
           };
         });
       },
@@ -157,10 +175,17 @@ ${minaRow(text)}`,
   };
 
   /* ---------- Sieg ---------- */
+  const WINTEXT = [
+    "Das hast du toll gemacht, Hannah! Das erste Sternstück leuchtet wieder.",
+    "Juhu, was für ein Tag im Europapark! Das zweite Sternstück ist gefunden.",
+    "Du bist eine echte Rechen-Zauberin! Das dritte Sternstück funkelt.",
+    "Mmh, das duftet! Das vierte Sternstück ist gefunden.",
+    "Der Zauberstern ist wieder ganz! Danke, Hannah, du bist die Beste!",
+  ];
   screens.win = ({ level = 0 }) => ({
     cls: "win",
     html: `<h1>Sternstück gefunden!</h1><div class="art">${Art.winScene(state.horse)}</div>
-${minaRow("Das hast du toll gemacht, Hanna! Das erste Sternstück leuchtet wieder.")}
+${minaRow(WINTEXT[level])}
 <button class="btn big" id="back">Zur Karte</button>`,
     mount(el) {
       state.stars[level] = true; save();
@@ -174,5 +199,5 @@ ${minaRow("Das hast du toll gemacht, Hanna! Das erste Sternstück leuchtet wiede
     go("title");
   };
 
-  return { state, save, screens, go, say, speak, sfx, start, top, steps, minaRow, svgPoint, confetti, $, speakerSvg, LEVELS };
+  return { ALL, state, save, screens, go, say, speak, sfx, start, top, steps, minaRow, svgPoint, confetti, $, speakerSvg, LEVELS };
 })();
