@@ -208,7 +208,7 @@ ${minaRow("Willst du das ganze Abenteuer nochmal von vorne spielen? Dann sind al
   /* ---------- Karte ---------- */
   const NODES = [[28, 82], [70, 64], [30, 47], [70, 31], [42, 13]];
   const lockSvg = `<svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`;
-  const ENTRY = ["l1search", "l2find", "l3potion", null, null];
+  const ENTRY = ["l1search", "l2find", "l3potion", "l4dough", "l5maze"];
   const isOpen = (i) => ENTRY[i] && (ALL || i === 0 || state.stars[i - 1] || state.stars[i]);
   screens.map = () => {
     const nodes = NODES.map(([x, y], i) => {
@@ -223,10 +223,10 @@ ${minaRow("Willst du das ganze Abenteuer nochmal von vorne spielen? Dann sind al
       "Tippe auf die 1, dann geht's los. Auf dem Bauernhof wartet Cheyenne!",
       "Ein Sternstück leuchtet schon! Tippe auf die 2, wir fahren in den Europapark.",
       "Zwei Sternstücke! Tippe auf die 3. In der Zauber-Schule wird gerechnet.",
-      "Drei Sternstücke! Die Backwelt öffnet bald ihre Türen. Versprochen!",
-      "Vier Sternstücke! Das Fee-Schloss kommt bald.",
+      "Drei Sternstücke! Tippe auf die 4. In der Backwelt duftet es schon nach Kuchen.",
+      "Vier Sternstücke! Tippe auf die 5. Das Fee-Schloss wartet auf uns!",
     ];
-    const text = next === -1 ? "Alle Sternstücke gefunden! Mein Zauberstern leuchtet wieder." : MAPTEXT[next];
+    const text = next === -1 ? "Alle Sternstücke gefunden! Tippe auf eine Etappe, um sie nochmal zu spielen." : MAPTEXT[next];
     const pos = next === -1 ? 4 : next;
     const [hx, hy] = NODES[pos];
     return {
