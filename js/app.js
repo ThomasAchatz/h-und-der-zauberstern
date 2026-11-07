@@ -268,7 +268,22 @@ ${minaRow(WINTEXT[level])}
     },
   });
 
+  /* Auf Tablets und großen Bildschirmen die ganze Spielfläche gleichmäßig vergrößern */
+  const BASE_W = 440, BASE_H = 700, MAX_W = 560;
+  const fit = () => {
+    const app = $("#app");
+    const W = window.innerWidth, H = window.innerHeight;
+    const s = Math.max(1, Math.min(2.4, W / BASE_W, H / BASE_H));
+    if (s <= 1.02) { app.removeAttribute("style"); document.body.classList.remove("scaled"); return; }
+    const bw = Math.min(MAX_W, W / s), bh = H / s;
+    document.body.classList.add("scaled");
+    Object.assign(app.style, { position: "absolute", top: "0", left: `${(W - bw) / 2}px`, width: `${bw}px`, height: `${bh}px`, maxWidth: "none", margin: "0", transformOrigin: "50% 0", transform: `scale(${s})` });
+  };
+  window.addEventListener("resize", fit);
+  window.addEventListener("orientationchange", () => setTimeout(fit, 200));
+
   const start = () => {
+    fit();
     document.body.insertAdjacentHTML("afterbegin", Art.defs());
     go("title");
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { const b = $("#bubble"); if (b) fitBubble(b); });
