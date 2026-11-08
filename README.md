@@ -12,6 +12,7 @@ Browser, ohne Installation und ohne Anmeldung. Der Spielstand bleibt lokal im Ge
 - Level 3 (Zauber-Schule, 2. Klasse Volksschule Österreich): 8 Zaubertränke mit Plus und Minus bis 100 (mit und ohne Zehnerübergang, Ergänzen), 6 Zauberkugeln als erste Malrechnungen mit Bildern, Zauberladen mit Euro und Cent. Aufgaben werden bei jedem Spiel neu gewürfelt.
 - Level 4 (Backwelt): Teig nach Rezept (Zutaten zählen, Gurke und Zwiebel gehören nicht hinein) und im Kreis rühren, Ofenuhr mit vollen und halben Stunden und einer Zeitspanne, Torte mit Obst-Mustern und frei verzieren
 - Level 5 (Fee-Schloss): zwei zufällige Heckenlabyrinthe, Memory mit Motiven der Reise, Zauberstern-Puzzle aus den fünf Sternstücken, Finale mit Feuerwerk und Urkunde für Hannah
+- Bonus „Rechen-Training“ (Knopf auf der Karte, immer offen): Plus und Mal in Lang- und Kurzschreibweise, Malrechnungen im Hunderterfeld bemalen, Plus und Minus mit Zehnerübergang, Zahlenfolgen fortsetzen. Runden mit 10 Aufgaben, Ziffernblock, Fehler kommen am Ende nochmal, Bestwert in Sternen
 - Auf dem Startbildschirm setzt „Neu beginnen“ (mit Rückfrage) den Spielstand zurück
 - Zum Testen schaltet `?alle` am Ende der Adresse alle fertigen Level frei
 
@@ -30,3 +31,4 @@ Dann `http://localhost:8000` am Handy-Format im Browser öffnen.
 - `js/art.js`: alle Grafiken als SVG (Hannah, Mina, Cheyenne, Szenen)
 - `js/app.js`: Navigation, Speicherstand, Titel, Einleitung, Karte, Sieg
 - `js/level1.js` bis `js/level5.js`: die Aufgaben der Level
+- `js/bonus.js`: das Rechen-Training

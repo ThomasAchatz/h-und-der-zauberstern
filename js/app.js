@@ -3,7 +3,7 @@
 const Game = (() => {
   const KEY = "hz-save-v1";
   const LEVELS = ["Bauernhof", "Europapark", "Zauber-Schule", "Backwelt", "Fee-Schloss"];
-  const defaults = { introSeen: false, stars: [false, false, false, false, false], sound: true, horse: Object.assign({}, Art.HORSE_DEFAULT) };
+  const defaults = { bonus: {}, introSeen: false, stars: [false, false, false, false, false], sound: true, horse: Object.assign({}, Art.HORSE_DEFAULT) };
   let state = JSON.parse(JSON.stringify(defaults));
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
@@ -233,9 +233,10 @@ ${minaRow("Willst du das ganze Abenteuer nochmal von vorne spielen? Dann sind al
       cls: "map",
       html: `${top("Hannahs Reise")}
 <div class="map-art"><svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M28 82C50 80 80 76 70 64C60 52 20 58 30 47C38 38 78 42 70 31C62 20 34 24 42 13" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 9" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
-${nodes}<div class="map-hanna" style="left:${hx + (hx < 50 ? -17 : 17)}%;top:${hy + 6}%">${Art.hanna()}</div></div>
+${nodes}<button class="bonus-btn" data-act="bonus"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><polygon points="${Art.starPts(10)}" transform="translate(12 12)" fill="url(#g-star)" stroke="#D99A1E" stroke-width="1.2"/></svg><span>Bonus:<br>Rechnen</span></button><div class="map-hanna" style="left:${hx + (hx < 50 ? -17 : 17)}%;top:${hy + 6}%">${Art.hanna()}</div></div>
 ${minaRow(text)}`,
       mount(el) {
+        $(".bonus-btn", el).onclick = () => { sfx("tap"); go("bonus"); };
         el.querySelectorAll(".node").forEach((n) => {
           n.onclick = () => {
             const i = +n.dataset.level;
